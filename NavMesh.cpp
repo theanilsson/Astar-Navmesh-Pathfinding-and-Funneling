@@ -79,9 +79,7 @@ void NavMesh::CalculateConnections()
 	for (int i = 1; i < myNodes.size() - 1; i++)
 	{
 		if (myNodes[i].connections.size() == 3)
-		{
 			continue;
-		}
 
 		for (int j = i + 1; j < myNodes.size(); j++)
 		{
@@ -91,9 +89,7 @@ void NavMesh::CalculateConnections()
 				myNodes[j].connections.push_back(i);
 
 				if (myNodes[i].connections.size() == 3)
-				{
 					break;
-				}
 			}
 		}
 	}
@@ -174,8 +170,10 @@ std::vector<Tga::Vector2f> NavMesh::FindShortestPath(const Tga::Vector2f& aStart
 		frontier.pop();
 		myNodes[currentLocation.index].state = eNodeState::Closed;
 
+		// Check if the algorithm found a valid path with the current frontier node
 		if (currentLocation.index == endIndex)
 		{
+			// Construct path data
 			std::vector<Node*> path;
 			int current = cameFrom[endIndex];
 			path.push_back(&myNodes[endIndex]);
@@ -188,62 +186,50 @@ std::vector<Tga::Vector2f> NavMesh::FindShortestPath(const Tga::Vector2f& aStart
 			std::reverse(path.begin(), path.end());
 
 
+			// Construct portals for path funneling
 			std::vector<Edge> portals;
 			portals.reserve(path.size() * 3 + 1);
-
-			// Start point as the first portal
 			portals.push_back({ aStart, aStart });
-
-			bool isFirstNode = true;
-			for (size_t i = 0; i < path.size() - 1; i++)
+			for (size_t i = 1; i < path.size() - 1; i++)
 			{
 				Node* currentNode = path[i];
 				Node* nextNode = path[i + 1];
 
-				// Skip the first node as it already starts the portal chain
-				if (isFirstNode)
+				for (int currentIndex = 0; currentIndex < 3; currentIndex++)
 				{
-					isFirstNode = false;
-					continue;
-				}
-
-				// Identify shared edges between currentNode and nextNode
-				for (int ci = 0; ci < 3; ci++)
-				{
-					for (int ni = 0; ni < 3; ni++)
+					for (int nextIndex = 0; nextIndex < 3; nextIndex++)
 					{
-						Tga::Vector2f currentVert1 = myMeshData.vertices[currentNode->indices[ci]];
-						Tga::Vector2f currentVert2 = myMeshData.vertices[currentNode->indices[(ci + 1) % 3]];
-						Tga::Vector2f nextVert1 = myMeshData.vertices[nextNode->indices[ni]];
-						Tga::Vector2f nextVert2 = myMeshData.vertices[nextNode->indices[(ni + 1) % 3]];
+						Tga::Vector2f currentVertex1 = myMeshData.vertices[currentNode->indices[currentIndex]];
+						Tga::Vector2f currentVertex2 = myMeshData.vertices[currentNode->indices[(currentIndex + 1) % 3]];
+						Tga::Vector2f nextVertex1 = myMeshData.vertices[nextNode->indices[nextIndex]];
+						Tga::Vector2f nextVertex2 = myMeshData.vertices[nextNode->indices[(nextIndex + 1) % 3]];
 
-						// Check if edges are shared
-						if ((currentVert1 == nextVert1 && currentVert2 == nextVert2) || (currentVert1 == nextVert2 && currentVert2 == nextVert1))
+						if ((currentVertex1 == nextVertex1 && currentVertex2 == nextVertex2) || (currentVertex1 == nextVertex2 && currentVertex2 == nextVertex1))
 						{
-							portals.push_back({ currentVert1, currentVert2 });
+							portals.push_back({ currentVertex1, currentVertex2 });
 						}
 					}
 				}
 			}
-
-			// Add the end point as the final portal
 			portals.push_back({ anEnd, anEnd });
-			mySavedPortals = portals;
-			std::vector<Tga::Vector2f> optimizedPath;
-			FunnelPath(portals, optimizedPath);
+
+
 			for (auto& node : myNodes)
 			{
 				node.state = eNodeState::Unvisited;
 			}
+			mySavedPortals = portals;
+			std::vector<Tga::Vector2f> optimizedPath;
+			FunnelPath(portals, optimizedPath);
 			return optimizedPath;
 		}
 
+		// Traverse the current frontier node
 		for (int next : myNodes[currentLocation.index].connections)
 		{
 			if (myNodes[next].state != eNodeState::Open)
-			{
 				continue;
-			}
+
 			float newCost = costSoFar[currentLocation.index] + (std::abs(myNodes[next].center.x - myNodes[currentLocation.index].center.x) + std::abs(myNodes[next].center.y - myNodes[currentLocation.index].center.y));
 			if (costSoFar[next] == std::numeric_limits<float>::infinity() || newCost < costSoFar[next])
 			{
@@ -281,17 +267,20 @@ int NavMesh::GetNodeIndexFromPoint(const Tga::Vector2f& aPoint) const
 		float maxX = std::max({ pointA.x, pointB.x, pointC.x });
 		float minY = std::min({ pointA.y, pointB.y, pointC.y });
 		float maxY = std::max({ pointA.y, pointB.y, pointC.y });
-		if (aPoint.x < minX || aPoint.x > maxX || aPoint.y < minY || aPoint.y > maxY)
+		if (aPoint.x < minX || aPoint.x > maxX || aPoint.y < minY || aPoint.y > maxY) 
 			continue;
 
 		float denominator = (pointB.y - pointC.y) * (pointA.x - pointC.x) + (pointC.x - pointB.x) * (pointA.y - pointC.y);
-		if (denominator == 0.0f) continue; // Degenerate triangle
+		if (denominator == 0.0f) 
+			continue; // Degenerate triangle
 
 		float w1 = ((pointB.y - pointC.y) * (aPoint.x - pointC.x) + (pointC.x - pointB.x) * (aPoint.y - pointC.y)) / denominator;
 		float w2 = ((pointC.y - pointA.y) * (aPoint.x - pointC.x) + (pointA.x - pointC.x) * (aPoint.y - pointC.y)) / denominator;
 		float w3 = 1.0f - w1 - w2;
-		if (w1 >= 0 && w2 >= 0 && w3 >= 0) return i; // Found node
+		if (w1 >= 0 && w2 >= 0 && w3 >= 0) 
+			return i; // Found node
 	}
+
 	return -1;
 }
 
@@ -318,9 +307,7 @@ void NavMesh::FunnelPath(const std::vector<Edge>& somePortals, std::vector<Tga::
 	for (int i = 2; i < somePortals.size(); ++i)
 	{
 		if (somePortals[i].firstPoint == funnelApex || somePortals[i].secondPoint == funnelApex)
-		{
 			continue;
-		}
 
 		Tga::Vector2f portalLeft;
 		Tga::Vector2f portalRight;
@@ -367,7 +354,7 @@ void NavMesh::FunnelPath(const std::vector<Edge>& somePortals, std::vector<Tga::
 		{
 			if (IsToTheLeftOfLine(funnelApex, funnelLeft, portalRight))
 			{
-				// Set new funnel apex using right vertex
+				// Set new funnel apex using left vertex
 				funnelApex = funnelLeft;
 				funnelRight = funnelApex;
 				i = leftIndex;
