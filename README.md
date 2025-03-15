@@ -2,5 +2,5 @@
 A clean and efficient implementation of the A-star algorithm and an accompanying funneling algorithm, used for finding the shortest possible path on navigation meshes
 
 <ins>Disclaimer:</ins></br>
-The functions for loading and initializing the NavMesh data from obj files is not produced by me.</br>
-The rest of the implementation is entirely produced by me.
+The functions for loading and initializing the NavMesh data from obj files were not produced by me.</br>
+The rest of the implementation was entirely produced by me.
