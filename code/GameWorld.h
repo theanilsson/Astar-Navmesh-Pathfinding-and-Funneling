@@ -1,5 +1,5 @@
 #pragma once
-#include <tge/graphics/Camera.h>
+#include <tge/math/vector2.h>
 
 namespace Tga 
 {
