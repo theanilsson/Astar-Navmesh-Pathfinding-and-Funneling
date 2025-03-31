@@ -56,28 +56,23 @@ constexpr float AbsF(float x)
 class NavMesh
 {
 public:
-	// Init stage functions //
 	NavMesh() = default;
 	~NavMesh() = default;
 	void Init(const char* aObjFile);
 
-	// Pathfinding functions //
 	std::vector<Tga::Vector2f> FindShortestPath(const Tga::Vector2f& aStart, const Tga::Vector2f& anEnd);
 	int GetNodeIndexFromPoint(const Tga::Vector2f& aPoint) const;
 
-	// Render functions //
 	void RenderNavmesh(Tga::DebugDrawer& aDebugDrawer);
 	void RenderConnections(Tga::DebugDrawer& aDebugDrawer);
 	void RenderPortals(Tga::DebugDrawer& aDebugDrawer);
 
 private:
-	// Init functions //
 	Mesh LoadMesh(const char* aObjFile);
 	void CreateNodes();
 	void CalculateConnections();
 	inline bool AreConnected(const int aFirstIndex, const int aSecondIndex);
 
-	// Pathfinding functions //
 	void FunnelPath(const std::vector<Edge>& somePortals, std::vector<Tga::Vector2f>& outPath);
 	constexpr float GetHeuristic(const Tga::Vector2f& aPathNode, const Tga::Vector2f& anEndNode) const
 	{
