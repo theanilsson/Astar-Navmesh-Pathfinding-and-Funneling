@@ -56,8 +56,6 @@ constexpr float AbsF(float x)
 class NavMesh
 {
 public:
-	NavMesh() = default;
-	~NavMesh() = default;
 	void Init(const char* aObjFile);
 
 	std::vector<Tga::Vector2f> FindShortestPath(const Tga::Vector2f& aStart, const Tga::Vector2f& anEnd);
