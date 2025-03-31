@@ -11,6 +11,10 @@ class GameWorld
 {
 public:
 	GameWorld();
+	GameWorld(const GameWorld& anOtherEntity) = delete;
+	GameWorld& operator=(const GameWorld& anOtherEntity) = delete;
+	GameWorld(GameWorld&& anOtherEntity) = default;
+	GameWorld& operator=(GameWorld&& anOtherEntity) = default;
 	~GameWorld();
 	void Init();
 
